@@ -1,11 +1,22 @@
-const express = require("express");
-const app = express();
+const http = require("node:http");
 const port = 3000;
 
-app.get("/getTimeStories", async (req, res) => {
+function requestHandler(req, res) {
+  switch (req.url) {
+    case "/getTimeStories":
+      getTimeStoriesController(req, res);
+      break;
+    default:
+      res.end("Home!");
+      break;
+  }
+}
+
+async function getTimeStoriesController(req, res) {
   const result = await getTimeStories();
-  return res.json(result);
-});
+  res.writeHead(200, "OK", { "content-type": "application/json" });
+  return res.end(JSON.stringify(result));
+}
 
 function getTimeStories() {
   const url = "https://time.com";
@@ -37,6 +48,5 @@ function getTimeStories() {
     .catch((err) => new Error(err));
 }
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`);
-});
+const server = http.createServer(requestHandler);
+server.listen(port, () => console.log(`Listening on ${port}`));
